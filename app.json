@@ -3,9 +3,7 @@
     "name": "quants_application",
     "slug": "quants_application",
     "version": "1.0.0",
-    "assetBundlePatterns": [
-      "**/*"
-    ]
+    "assetBundlePatterns": ["**/*"]
   },
   "name": "quants_application"
 }
