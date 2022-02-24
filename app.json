@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "quants_application",
+    "slug": "quants_application",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  },
+  "name": "quants_application"
+}
