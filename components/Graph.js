@@ -8,6 +8,10 @@ import {
     VictoryLine,
     VictoryTheme,
   } from "victory-native";
+  
+  let samples = []
+
+  let old = "btcusdt"
 
   const sampleDataDates = [
     { x: new Date(2016, 6, 1), open: 5, close: 10, high: 15, low: 0 },
@@ -34,7 +38,7 @@ export default function Graph ({ item }) {
 
     const msg = {
       method: 'SUBSCRIBE',
-      params: [`btcusdt@kline_1m`],
+      params: [`btcusdt@trade`],
       id: 1,
     };
 
@@ -58,86 +62,87 @@ export default function Graph ({ item }) {
     }, []);
 
     useEffect(() => {
-
+      let tmp = ""
+      let i = 0
+      let update = false;
+      let unsub = false;
       const msg = {
         method: 'SUBSCRIBE',
         params: [`btcusdt@kline_1m`],
         id: 1,
       };
-
       const msg2 = {
           method: 'UNSUBSCRIBE',
-          params: [`btcusdt@kline_1m`],
+          params: [`btcusdt@trade`],
           id: 12,
       }
-      
-      const msg3 = {
+       const msg3 = {
         method: 'SUBSCRIBE',
         params: [`ethusdt@kline_1m`],
         id: 4,
       };
-
-      let i = 0
-
-      let update = false;
 
         if ( item.toString().length != 0)
         {
           update = true
         }
 
+        console.log("old" + old)
+
         if (!ws.current) return;
 
         ws.current.onmessage = e => {
             const message = JSON.parse(e.data);
-            console.log(i)
-            if ( i < 2 ) {
-               console.log("sub", message);
-            } else if ( update == true )  {
-              console.log("sub new")
-              ws.current.send(JSON.stringify(msg2));
-              ws.current.send(JSON.stringify(msg3));
+            console.log(tmp)
+            if ( update == true )  {
+              console.log("on tente d'update" + tmp)
+
+              if ( old ) 
+              {
+                console.log("desoucrie de" + old)
+                let msg4 = {
+                  method: 'UNSUBSCRIBE',
+                  params: [`${old}@trade`],
+                  id: 5,
+                };
+                console.log(JSON.stringify(msg4))
+                ws.current.send(JSON.stringify(msg2));
+                unsub = true
+              }
+
+              if ( item && unsub == true)
+              {
+                console.log("souscrire")
+                let usd = item.toString().toLowerCase() + 'usdt'
+                let msg5 = {
+                  method: 'SUBSCRIBE',
+                  params: [`${usd}@trade`],
+                  id: 5,
+                };
+                samples = []
+                console.log(JSON.stringify(msg5))
+                ws.current.send(JSON.stringify(msg5));
+              }
               update = false
+              unsub = false
             }
-            else if ( i >= 2 ) {
-              console.log("presub", message);
+            else {
+              if ( message.s == item.toString().toUpperCase() + 'USDT')
+                  console.log(message.p)
+
             }
-            i++
-        };
-    }, [item]);
-
-
-
-    const websock = ( stream ) => {
-
-        const msg = {
-          method: 'SUBSCRIBE',
-          params: [`${stream}@kline_1m`],
-          id: 1,
-        };
-
-        const unsub = {
-            method: 'UNSUBSCRIBE',
-            params: [`${stream}@kline_1m`],
-            id: 1,
+            if ( item.toString().toLowerCase().length != 0 )
+            {
+              old = item.toString().toLowerCase() + 'usdt' 
+            }
         };
         
-        ws.onopen = () => {
-          ws.send(JSON.stringify(msg));
-        };
 
-        setInterval(() => {
-          ws.onmessage = e => {
-            console.log(e)
-            if (i > 6 ) ws.send(JSON.stringify(unsub));
-            i++
-        };
-        }, 1000);
-            
-    }
+    }, [item]);
 
   return (
       <View style={styles.graph}>
+        <Text>{ JSON.stringify(samples) }</Text>
         <VictoryChart
           width={350}
           theme={VictoryTheme.material}
@@ -147,6 +152,7 @@ export default function Graph ({ item }) {
           <VictoryAxis tickFormat={(t) => `${t.getDate()}/${t.getMonth()}`} />
           <VictoryAxis dependentAxis />
           <VictoryCandlestick
+            animate
             candleColors={{ positive: "#5f5c5b", negative: "#c43a31" }}
             data={sampleDataDates}
           />

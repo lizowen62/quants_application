@@ -43,6 +43,7 @@ const Item = ({ title }) => (
 const App = () => {
 
   const [data, setData] = useState([]);
+  const [filter, setFilter] = useState([]);
   const [loading, setLoading] = useState(true);
   const [select, setSelect] = useState("");
   const [symbol, setSymbol] = useState("");
@@ -50,20 +51,11 @@ const App = () => {
 
   useEffect(() => {
     fetchData();
-    setSample(sampleDataDates)
   }, []);
 
   function updateSearch(value) {
-    //do your search logic or anything
-    console.log(value)
-}
-
-  function handleFilter(e) {
-    e.preventDefault();
-    console.group();
-    console.log(e.target.value);
-    filter = data.filter( data.name != e.target.value)
-    console.groupEnd();
+    let result = data.filter( item => item.name.includes(value))
+    setFilter(result)
   }
 
   const selectCrypto = (key, symbol) => {
@@ -87,6 +79,7 @@ const App = () => {
     );
     const data = await resp.json();
     setData(data.data);
+    setFilter(data.data)
     setLoading(false);
   };
 
@@ -98,7 +91,7 @@ const App = () => {
       <SearchCustom callback={updateSearch}/>
         {data && (
           <FlatList
-            data={data}
+            data={filter}
             renderItem={({ item }) => (
               <CryptoItem item={item} callback={selectCrypto}></CryptoItem>
             )}
