@@ -57,54 +57,54 @@ export default function Graph ({ item }) {
         };
     }, []);
 
-    useEffect(() => {
+    // useEffect(() => {
 
-      const msg = {
-        method: 'SUBSCRIBE',
-        params: [`btcusdt@kline_1m`],
-        id: 1,
-      };
+    //   const msg = {
+    //     method: 'SUBSCRIBE',
+    //     params: [`btcusdt@kline_1m`],
+    //     id: 1,
+    //   };
 
-      const msg2 = {
-          method: 'UNSUBSCRIBE',
-          params: [`btcusdt@kline_1m`],
-          id: 12,
-      }
+    //   const msg2 = {
+    //       method: 'UNSUBSCRIBE',
+    //       params: [`btcusdt@kline_1m`],
+    //       id: 12,
+    //   }
       
-      const msg3 = {
-        method: 'SUBSCRIBE',
-        params: [`ethusdt@kline_1m`],
-        id: 4,
-      };
+    //   const msg3 = {
+    //     method: 'SUBSCRIBE',
+    //     params: [`ethusdt@kline_1m`],
+    //     id: 4,
+    //   };
 
-      let i = 0
+    //   let i = 0
 
-      let update = false;
+    //   let update = false;
 
-        if ( item.toString().length != 0)
-        {
-          update = true
-        }
+    //     if ( item.toString().length != 0)
+    //     {
+    //       update = true
+    //     }
 
-        if (!ws.current) return;
+    //     if (!ws.current) return;
 
-        ws.current.onmessage = e => {
-            const message = JSON.parse(e.data);
-            console.log(i)
-            if ( i < 2 ) {
-               console.log("sub", message);
-            } else if ( update == true )  {
-              console.log("sub new")
-              ws.current.send(JSON.stringify(msg2));
-              ws.current.send(JSON.stringify(msg3));
-              update = false
-            }
-            else if ( i >= 2 ) {
-              console.log("presub", message);
-            }
-            i++
-        };
-    }, [item]);
+    //     ws.current.onmessage = e => {
+    //         const message = JSON.parse(e.data);
+    //         console.log(i)
+    //         if ( i < 2 ) {
+    //            console.log("sub", message);
+    //         } else if ( update == true )  {
+    //           console.log("sub new")
+    //           ws.current.send(JSON.stringify(msg2));
+    //           ws.current.send(JSON.stringify(msg3));
+    //           update = false
+    //         }
+    //         else if ( i >= 2 ) {
+    //           console.log("presub", message);
+    //         }
+    //         i++
+    //     };
+    // }, [item]);
 
 
 
