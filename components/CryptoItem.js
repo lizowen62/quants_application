@@ -3,9 +3,10 @@ import { StyleSheet, View,  Text, TouchableOpacity } from "react-native";
 
 export default function CryptoItem({ item, callback }) {
   return (
-    <TouchableOpacity onPress={() => callback(item.name)}>
+    <TouchableOpacity onPress={() => callback(item.name, item.symbol)}>
       <View style={styles.item}>
         <Text>{item.name}</Text>
+        <Text>{ item.quote.USD.price.toFixed(2) } $ </Text>
         <Text style={styles.tag}>{item.symbol}</Text>
       </View>
     </TouchableOpacity>
@@ -24,7 +25,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   tag: {
-      padding: 4,
+    padding: 4,
     borderColor: "#bbb",
     borderWidth: 1,
     borderRadius: 2,

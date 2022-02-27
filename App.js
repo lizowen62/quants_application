@@ -3,27 +3,22 @@ import {
   SafeAreaView,
   View,
   FlatList,
+  Button,
   StyleSheet,
   Text,
   StatusBar,
 } from "react-native";
-import { VictoryBar,VictoryCandlestick, VictoryAxis, VictoryChart, VictoryLine, VictoryTheme } from "victory-native";
 import {
   backgroundColor,
   borderColor,
 } from "react-native/Libraries/Components/View/ReactNativeStyleAttributes";
 import CryptoItem from "./components/CryptoItem";
-
+import Graph from "./components/Graph";
+import SearchCustom from "./components/SearchBar";
 import WS from "react-native-websocket";
 
-const data2 = [
-  { year: '2011', earnings: 13000 },
-  { year: '2012', earnings: 16500 },
-  { year: '2013', earnings: 14250 },
-  { year: '2014', earnings: 19000 }
- ];
 
- const sampleDataDates = [
+const sampleDataDates = [
   { x: new Date(2016, 6, 1), open: 5, close: 10, high: 15, low: 0 },
   { x: new Date(2016, 6, 2), open: 10, close: 15, high: 20, low: 5 },
   { x: new Date(2016, 6, 3), open: 15, close: 20, high: 22, low: 10 },
@@ -35,8 +30,9 @@ const data2 = [
   { x: new Date(2016, 6, 9), open: 20, close: 10, high: 25, low: 7 },
   { x: new Date(2016, 6, 10), open: 20, close: 10, high: 25, low: 7 },
   { x: new Date(2016, 6, 11), open: 20, close: 10, high: 25, low: 7 },
-  { x: new Date(2016, 6, 5), open: 10, close: 8, high: 15, low: 5 }
+  { x: new Date(2016, 6, 5), open: 10, close: 8, high: 15, low: 5 },
 ];
+
 
 const Item = ({ title }) => (
   <View style={styles.item}>
@@ -45,31 +41,34 @@ const Item = ({ title }) => (
 );
 
 const App = () => {
+
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [select, setSelect] = useState("");
-
-  const [crypto, setCrypto] = useState([
-    {
-      id: "bd7acbea-c1b1-46c2-aed5-3ad53abb28ba",
-      title: "Firctst Item",
-    },
-    {
-      id: "3ac68afc-c605-48d3-a4f8-fbd91aa97f63",
-      title: "Second Item",
-    },
-    {
-      id: "58694a0f-3da1-471f-bd96-145571e29d72",
-      title: "Thirddyuoru Itiem",
-    },
-  ]);
+  const [symbol, setSymbol] = useState("");
+  const [sample, setSample] = useState([]);
 
   useEffect(() => {
     fetchData();
+    setSample(sampleDataDates)
   }, []);
 
-  const selectCrypto = (key) => {
-    setSelect(key)
+  function updateSearch(value) {
+    //do your search logic or anything
+    console.log(value)
+}
+
+  function handleFilter(e) {
+    e.preventDefault();
+    console.group();
+    console.log(e.target.value);
+    filter = data.filter( data.name != e.target.value)
+    console.groupEnd();
+  }
+
+  const selectCrypto = (key, symbol) => {
+    setSelect(key);
+    setSymbol(symbol)
     setData((prev) => {
       return prev.filter((todo) => todo.name != key);
     });
@@ -96,6 +95,7 @@ const App = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.cryptoList}>
+      <SearchCustom callback={updateSearch}/>
         {data && (
           <FlatList
             data={data}
@@ -107,21 +107,13 @@ const App = () => {
         )}
       </View>
       <View style={styles.graph}>
-      <VictoryChart 
-      width={350}
-      theme={VictoryTheme.material}
-      domainPadding={{ x: 40 }}
-      scale={{ x: "time" }}
-      >
-              <VictoryAxis tickFormat={t => `${t.getDate()}/${t.getMonth()}`} />
-        <VictoryAxis dependentAxis />
-        <VictoryCandlestick
-          candleColors={{ positive: "#5f5c5b", negative: "#c43a31" }}
-          data={sampleDataDates}
-        />
-      </VictoryChart>
+        <Graph item={symbol}></Graph>
       </View>
-      { select.length != 0 ? (<Text>Cours Actuel du { select }</Text> ) : (<Text></Text>)}
+      {select.length != 0 ? (
+        <Text>Cours Actuelgs du {select}</Text>
+      ) : (
+        <Text></Text>
+      )}
     </SafeAreaView>
   );
 };
@@ -134,11 +126,12 @@ const styles = StyleSheet.create({
   graph: {
     padding: 8,
     paddingLeft: 30,
-    justifyContent:'center',
-    alignItems: 'center'
+    justifyContent: "center",
+    alignItems: "center",
   },
   cryptoList: {
-    paddingTop: 10,
+    marginTop: 10,
+    paddingTop: 15,
     borderRadius: 7,
     borderStyle: "solid",
     borderBottomWidth: 1,
