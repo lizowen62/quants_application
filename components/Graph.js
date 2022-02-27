@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { StyleSheet, View,  Text, TouchableOpacity } from "react-native";
+import { StyleSheet, Button, View,  Text, TouchableOpacity } from "react-native";
 import {
     VictoryBar,
     VictoryCandlestick,
@@ -13,7 +13,7 @@ import {
 
   let old = "btcusdt"
 
-  const sampleDataDates = [
+  let sampleDataDates = [
     { x: new Date(2016, 6, 1), open: 5, close: 10, high: 15, low: 0 },
     { x: new Date(2016, 6, 2), open: 10, close: 15, high: 20, low: 5 },
     { x: new Date(2016, 6, 3), open: 15, close: 20, high: 22, low: 10 },
@@ -33,6 +33,22 @@ export default function Graph ({ item }) {
     const [ count, setCount] = useState(0)
     const [ change, setChange] = useState(false)
     const [ stream , setStream] = useState("")
+    const [ datas, setDatas ] = useState(
+      [
+        { x: new Date(2016, 6, 1), open: 5, close: 10, high: 15, low: 0 },
+        { x: new Date(2016, 6, 2), open: 10, close: 15, high: 20, low: 5 },
+        { x: new Date(2016, 6, 3), open: 15, close: 20, high: 22, low: 10 },
+        { x: new Date(2016, 6, 4), open: 20, close: 10, high: 25, low: 7 },
+        { x: new Date(2016, 6, 5), open: 20, close: 10, high: 25, low: 7 },
+        { x: new Date(2016, 6, 6), open: 20, close: 10, high: 25, low: 7 },
+        { x: new Date(2016, 6, 7), open: 20, close: 10, high: 25, low: 7 },
+        { x: new Date(2016, 6, 8), open: 20, close: 10, high: 25, low: 7 },
+        { x: new Date(2016, 6, 9), open: 20, close: 10, high: 25, low: 7 },
+        { x: new Date(2016, 6, 10), open: 20, close: 10, high: 25, low: 7 },
+        { x: new Date(2016, 6, 11), open: 20, close: 10, high: 25, low: 7 },
+        { x: new Date(2016, 6, 5), open: 10, close: 8, high: 15, low: 5 },
+      ]
+    )
 
     let i = 0
 
@@ -103,7 +119,7 @@ export default function Graph ({ item }) {
                 let msg4 = {
                   method: 'UNSUBSCRIBE',
                   params: [`${old}@trade`],
-                  id: 5,
+                  id: count,
                 };
                 console.log(JSON.stringify(msg4))
                 ws.current.send(JSON.stringify(msg2));
@@ -117,7 +133,7 @@ export default function Graph ({ item }) {
                 let msg5 = {
                   method: 'SUBSCRIBE',
                   params: [`${usd}@trade`],
-                  id: 5,
+                  id: count + 100 ,
                 };
                 samples = []
                 console.log(JSON.stringify(msg5))
@@ -129,20 +145,37 @@ export default function Graph ({ item }) {
             else {
               if ( message.s == item.toString().toUpperCase() + 'USDT')
                   console.log(message.p)
+                  // let newValue = { x: new Date(2016, 6, 12), open: 30, close: 10, high: 35, low: 0 }
+                  // setDatas(prevArray => [...prevArray, newValue])
 
             }
+
             if ( item.toString().toLowerCase().length != 0 )
             {
               old = item.toString().toLowerCase() + 'usdt' 
             }
         };
+
+        setCount(count + 1)
         
 
     }, [item]);
 
+    function updateSearch() {
+      console.log("olol")
+      let newValue = { x: new Date(2016, 6, 12), open: 30, close: 10, high: 35, low: 0 }
+      setDatas(prevArray => [...prevArray, newValue])
+    }
+
   return (
       <View style={styles.graph}>
-        <Text>{ JSON.stringify(samples) }</Text>
+        <Button
+          onPress={updateSearch}
+          title="Learn More"
+          color="#841584"
+          accessibilityLabel="Learn more about this purple button"
+        />
+        <Text>{ stream }</Text>
         <VictoryChart
           width={350}
           theme={VictoryTheme.material}
@@ -154,7 +187,7 @@ export default function Graph ({ item }) {
           <VictoryCandlestick
             animate
             candleColors={{ positive: "#5f5c5b", negative: "#c43a31" }}
-            data={sampleDataDates}
+            data={datas}
           />
         </VictoryChart>
      </View>

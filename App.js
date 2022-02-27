@@ -68,7 +68,7 @@ const App = () => {
 
   const fetchData = async () => {
     const resp = await fetch(
-      "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=20&cryptocurrency_type=coins",
+      "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=5&cryptocurrency_type=coins",
       {
         method: "get",
         headers: new Headers({
