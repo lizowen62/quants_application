@@ -17,7 +17,6 @@ import Graph from "./components/Graph";
 import SearchCustom from "./components/SearchBar";
 import WS from "react-native-websocket";
 
-
 const sampleDataDates = [
   { x: new Date(2016, 6, 1), open: 5, close: 10, high: 15, low: 0 },
   { x: new Date(2016, 6, 2), open: 10, close: 15, high: 20, low: 5 },
@@ -33,7 +32,6 @@ const sampleDataDates = [
   { x: new Date(2016, 6, 5), open: 10, close: 8, high: 15, low: 5 },
 ];
 
-
 const Item = ({ title }) => (
   <View style={styles.item}>
     <Text style={styles.title}>{title}</Text>
@@ -41,7 +39,6 @@ const Item = ({ title }) => (
 );
 
 const App = () => {
-
   const [data, setData] = useState([]);
   const [filter, setFilter] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,13 +51,13 @@ const App = () => {
   }, []);
 
   function updateSearch(value) {
-    let result = data.filter( item => item.name.includes(value))
-    setFilter(result)
+    let result = data.filter((item) => item.name.includes(value));
+    setFilter(result);
   }
 
   const selectCrypto = (key, symbol) => {
     setSelect(key);
-    setSymbol(symbol)
+    setSymbol(symbol);
     setData((prev) => {
       return prev.filter((todo) => todo.name != key);
     });
@@ -79,7 +76,7 @@ const App = () => {
     );
     const data = await resp.json();
     setData(data.data);
-    setFilter(data.data)
+    setFilter(data.data);
     setLoading(false);
   };
 
@@ -88,12 +85,13 @@ const App = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.cryptoList}>
-      <SearchCustom callback={updateSearch}/>
+        <SearchCustom callback={updateSearch} />
         {data && (
           <FlatList
+            initialNumToRender={10}
             data={filter}
             renderItem={({ item }) => (
-              <CryptoItem item={item} callback={selectCrypto}></CryptoItem>
+              <CryptoItem item={item} symbol={symbol} callback={selectCrypto}></CryptoItem>
             )}
             keyExtractor={(item) => item.id.toString()}
           />
@@ -103,7 +101,7 @@ const App = () => {
         <Graph item={symbol}></Graph>
       </View>
       {select.length != 0 ? (
-        <Text>Cours Actuelgs du {select}</Text>
+        <Text>Cours Actuel du {select} : </Text>
       ) : (
         <Text></Text>
       )}
@@ -117,7 +115,7 @@ const styles = StyleSheet.create({
     marginTop: StatusBar.currentHeight || 0,
   },
   graph: {
-    padding: 8,
+    padding: 6,
     paddingLeft: 30,
     justifyContent: "center",
     alignItems: "center",
@@ -131,7 +129,7 @@ const styles = StyleSheet.create({
     borderColor: "#A5A5A5",
     overflow: "scroll",
     margin: 8,
-    maxHeight: 180,
+    maxHeight: 240,
   },
   item: {
     backgroundColor: "#f9c2ff",
