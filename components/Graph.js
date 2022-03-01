@@ -8,6 +8,14 @@ import {
   VictoryLine,
   VictoryTheme,
 } from "victory-native";
+import {
+  LineChart,
+  BarChart,
+  PieChart,
+  ProgressChart,
+  ContributionGraph,
+  StackedBarChart
+} from 'react-native-chart-kit'
 
 let old = "btcusdt";
 
@@ -15,7 +23,7 @@ export default function Graph({ item }) {
   const [count, setCount] = useState(0);
   const [change, setChange] = useState(false);
   const [stream, setStream] = useState("");
-  const [datas, setDatas] = useState([{ x: 0, y: 0 }]);
+  const [datas, setDatas] = useState([{ x: 1646131796 , y: 0 }]);
 
   let i = 0;
 
@@ -66,10 +74,11 @@ export default function Graph({ item }) {
 
     ws.current.onmessage = (e) => {
       const message = JSON.parse(e.data);
-      console.log(tmp);
+      let i = 0
+      let last = ""
+      let second = new Date().getTime() / 1000
       if (update == true) {
         console.log("on tente d'update" + tmp);
-
         if (old) {
           console.log("desoucrie de" + old);
           let msg4 = {
@@ -93,48 +102,40 @@ export default function Graph({ item }) {
           samples = [];
           console.log(JSON.stringify(msg5));
           ws.current.send(JSON.stringify(msg5));
-           let newValue = { x: 0, y: 0 };
+           let newValue = { x: 1646131796, y: 2900 };
           setDatas([newValue]);
         }
         update = false;
         unsub = false;
       } else {
         if (message.s == item.toString().toUpperCase() + "USDT") {
-          if (up == true) {
+          console.log( i )
+          if ( i == 3 )
+          {
             let newValue = { x: new Date().getTime() / 1000, y: parseInt(message.p) };
             setDatas((prevArray) => [...prevArray, newValue]);
-            up = false;
+            i = 0
           }
+          i++
         }
+        setCount(count + 1);
       }
 
       if (item.toString().toLowerCase().length != 0) {
         old = item.toString().toLowerCase() + "usdt";
       }
     };
-
-    setCount(count + 1);
   }, [item]);
-
-  function updateSearch() {
-    console.log("olol");
-    let newValue = { x: 6, y: 9 };
-    setDatas((prevArray) => [...prevArray, newValue]);
-  }
 
   return (
     <View style={styles.graph}>
-      {/* <Button
-        onPress={updateSearch}
-        title="Learn More"
-        color="#841584"
-        accessibilityLabel="Learn more about this purple button"
-      /> */}
+      {/* <Text>{JSON.stringify(datas)}</Text> */}
       <Text>{stream}</Text>
       <VictoryChart
         width={350}
         theme={VictoryTheme.material}
       >
+        <VictoryAxis dependentAxis />
         <VictoryLine
           animate
           style={{

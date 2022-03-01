@@ -25,7 +25,9 @@
     "victory-native": "^36.3.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.9"
+    "@babel/core": "^7.12.9",
+    "eslint": "^8.10.0",
+    "eslint-plugin-react": "^7.29.2"
   },
   "private": true
 }
