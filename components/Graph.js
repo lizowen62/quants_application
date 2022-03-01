@@ -23,7 +23,7 @@ export default function Graph({ item }) {
   const [count, setCount] = useState(0);
   const [change, setChange] = useState(false);
   const [stream, setStream] = useState("");
-  const [datas, setDatas] = useState([{ x: 1646131796 , y: 0 }]);
+  const [datas, setDatas] = useState([{ x: (new Date().getTime() / 1000 ) , y: 0 }]);
 
   let i = 0;
 
@@ -102,23 +102,21 @@ export default function Graph({ item }) {
           samples = [];
           console.log(JSON.stringify(msg5));
           ws.current.send(JSON.stringify(msg5));
-           let newValue = { x: 1646131796, y: 2900 };
+          let newValue = { x: (new Date().getTime() / 1000 ), y: 2929.55 };
           setDatas([newValue]);
         }
         update = false;
         unsub = false;
       } else {
         if (message.s == item.toString().toUpperCase() + "USDT") {
-          console.log( i )
-          if ( i == 3 )
+          let date = (new Date().getTime() / 1000 ).toString().substr(-4)
+          if ( parseFloat(date) > .800 )
           {
-            let newValue = { x: new Date().getTime() / 1000, y: parseInt(message.p) };
+            console.log("enter" + (new Date().getTime() / 1000 ) + " val :"+ message.p )
+            let newValue = { x: (new Date().getTime() / 1000 ) , y: parseInt(message.p) };
             setDatas((prevArray) => [...prevArray, newValue]);
-            i = 0
           }
-          i++
         }
-        setCount(count + 1);
       }
 
       if (item.toString().toLowerCase().length != 0) {
