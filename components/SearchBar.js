@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-} from "react-native";
-import { SearchBar } from "react-native-elements";
+import { StyleSheet, View, TextInput } from "react-native";
 
 export default function CustomSearch({ callback }) {
   return (

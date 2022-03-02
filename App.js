@@ -3,40 +3,13 @@ import {
   SafeAreaView,
   View,
   FlatList,
-  Button,
   StyleSheet,
   Text,
   StatusBar,
 } from "react-native";
-import {
-  backgroundColor,
-  borderColor,
-} from "react-native/Libraries/Components/View/ReactNativeStyleAttributes";
 import CryptoItem from "./components/CryptoItem";
 import Graph from "./components/Graph";
 import SearchCustom from "./components/SearchBar";
-import WS from "react-native-websocket";
-
-const sampleDataDates = [
-  { x: new Date(2016, 6, 1), open: 5, close: 10, high: 15, low: 0 },
-  { x: new Date(2016, 6, 2), open: 10, close: 15, high: 20, low: 5 },
-  { x: new Date(2016, 6, 3), open: 15, close: 20, high: 22, low: 10 },
-  { x: new Date(2016, 6, 4), open: 20, close: 10, high: 25, low: 7 },
-  { x: new Date(2016, 6, 5), open: 20, close: 10, high: 25, low: 7 },
-  { x: new Date(2016, 6, 6), open: 20, close: 10, high: 25, low: 7 },
-  { x: new Date(2016, 6, 7), open: 20, close: 10, high: 25, low: 7 },
-  { x: new Date(2016, 6, 8), open: 20, close: 10, high: 25, low: 7 },
-  { x: new Date(2016, 6, 9), open: 20, close: 10, high: 25, low: 7 },
-  { x: new Date(2016, 6, 10), open: 20, close: 10, high: 25, low: 7 },
-  { x: new Date(2016, 6, 11), open: 20, close: 10, high: 25, low: 7 },
-  { x: new Date(2016, 6, 5), open: 10, close: 8, high: 15, low: 5 },
-];
-
-const Item = ({ title }) => (
-  <View style={styles.item}>
-    <Text style={styles.title}>{title}</Text>
-  </View>
-);
 
 const App = () => {
   const [data, setData] = useState([]);
@@ -44,28 +17,26 @@ const App = () => {
   const [loading, setLoading] = useState(true);
   const [select, setSelect] = useState("");
   const [symbol, setSymbol] = useState("");
-  const [sample, setSample] = useState([]);
 
   useEffect(() => {
     fetchData();
   }, []);
 
   function updateSearch(value) {
-    let result = data.filter((item) => item.name.includes(value));
+    let result = data.filter((item) =>
+      item.name.toUpperCase().includes(value.toUpperCase())
+    );
     setFilter(result);
   }
 
-  const selectCrypto = (key, symbol) => {
-    setSelect(key);
-    setSymbol(symbol);
-    setData((prev) => {
-      return prev.filter((todo) => todo.name != key);
-    });
+  const selectCrypto = (key) => {
+    setSelect(key.quote.USD.price.toFixed(2));
+    setSymbol(key.symbol);
   };
 
   const fetchData = async () => {
     const resp = await fetch(
-      "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=5&cryptocurrency_type=coins",
+      "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?limit=200&cryptocurrency_type=coins",
       {
         method: "get",
         headers: new Headers({
@@ -80,31 +51,32 @@ const App = () => {
     setLoading(false);
   };
 
-  const renderItem = ({ item }) => <Item title={item.name} />;
+  const renderItem = ({ item }) => (
+    <CryptoItem
+      item={item}
+      symbol={symbol}
+      callback={selectCrypto}
+    ></CryptoItem>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.cryptoList}>
         <SearchCustom callback={updateSearch} />
-        {data && (
+        {loading == false ? (
           <FlatList
             initialNumToRender={10}
             data={filter}
-            renderItem={({ item }) => (
-              <CryptoItem item={item} symbol={symbol} callback={selectCrypto}></CryptoItem>
-            )}
+            renderItem={renderItem}
             keyExtractor={(item) => item.id.toString()}
           />
+        ) : (
+          <Text>loading data from coinmarket </Text>
         )}
       </View>
       <View style={styles.graph}>
-        <Graph item={symbol}></Graph>
+        <Graph item={symbol} quote={select}></Graph>
       </View>
-      {select.length != 0 ? (
-        <Text>Cours Actuel du {select} : </Text>
-      ) : (
-        <Text></Text>
-      )}
     </SafeAreaView>
   );
 };
@@ -115,13 +87,10 @@ const styles = StyleSheet.create({
     marginTop: StatusBar.currentHeight || 0,
   },
   graph: {
-    padding: 6,
-    paddingLeft: 30,
     justifyContent: "center",
     alignItems: "center",
   },
   cryptoList: {
-    marginTop: 10,
     paddingTop: 15,
     borderRadius: 7,
     borderStyle: "solid",

@@ -1,49 +1,35 @@
 import React, { useEffect, useState, useRef } from "react";
-import { StyleSheet, Button, View, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import {
-  VictoryBar,
-  VictoryCandlestick,
   VictoryAxis,
   VictoryChart,
   VictoryLine,
   VictoryTheme,
+  VictoryZoomContainer,
 } from "victory-native";
-import {
-  LineChart,
-  BarChart,
-  PieChart,
-  ProgressChart,
-  ContributionGraph,
-  StackedBarChart
-} from 'react-native-chart-kit'
 
 let old = "btcusdt";
 
-export default function Graph({ item }) {
+export default function Graph({ item, quote }) {
   const [count, setCount] = useState(0);
-  const [change, setChange] = useState(false);
-  const [stream, setStream] = useState("");
-  const [datas, setDatas] = useState([{ x: (new Date().getTime() / 1000 ) , y: 0 }]);
-
-  let i = 0;
+  const [real, setReal] = useState(0);
+  const [datas, setDatas] = useState([{ x: 0, y: 0 }]);
 
   const msg = {
     method: "SUBSCRIBE",
     params: [`btcusdt@trade`],
     id: 1,
-  };
+  }; // subscribe by default
 
-  const [isPaused, setPause] = useState(false);
   const ws = useRef(null);
 
   useEffect(() => {
     ws.current = new WebSocket("wss://stream.binance.com:9443/ws");
     ws.current.onopen = () => {
-      console.log("open");
       ws.current.send(JSON.stringify(msg));
-    }; // sub to rand
+    };
 
-    ws.current.onclose = () => console.log("ws closed");
+    ws.current.onclose = () => console.log("websocket closed");
 
     const wsCurrent = ws.current;
 
@@ -53,103 +39,87 @@ export default function Graph({ item }) {
   }, []);
 
   useEffect(() => {
-    let tmp = "";
-    let i = 0;
     let update = false;
     let unsub = false;
-    let up = true;
-    const msg2 = {
-      method: "UNSUBSCRIBE",
-      params: [`btcusdt@trade`],
-      id: 12,
-    };
 
     if (item.toString().length != 0) {
       update = true;
     }
 
-    console.log("old" + old);
-
     if (!ws.current) return;
 
     ws.current.onmessage = (e) => {
       const message = JSON.parse(e.data);
-      let i = 0
-      let last = ""
-      let second = new Date().getTime() / 1000
       if (update == true) {
-        console.log("on tente d'update" + tmp);
         if (old) {
-          console.log("desoucrie de" + old);
-          let msg4 = {
+          let msg = {
             method: "UNSUBSCRIBE",
             params: [`${old}@trade`],
             id: count,
           };
-          console.log(JSON.stringify(msg4));
-          ws.current.send(JSON.stringify(msg2));
+          ws.current.send(JSON.stringify(msg));
           unsub = true;
         }
-
         if (item && unsub == true) {
-          console.log("souscrire");
           let usd = item.toString().toLowerCase() + "usdt";
-          let msg5 = {
+          let msg = {
             method: "SUBSCRIBE",
             params: [`${usd}@trade`],
             id: count + 100,
           };
-          samples = [];
-          console.log(JSON.stringify(msg5));
-          ws.current.send(JSON.stringify(msg5));
-          let newValue = { x: (new Date().getTime() / 1000 ), y: 2929.55 };
-          setDatas([newValue]);
+          ws.current.send(JSON.stringify(msg));
+          setDatas([]);
         }
         update = false;
         unsub = false;
       } else {
         if (message.s == item.toString().toUpperCase() + "USDT") {
-          let date = (new Date().getTime() / 1000 ).toString().substr(-4)
-          if ( parseFloat(date) > .800 )
-          {
-            console.log("enter" + (new Date().getTime() / 1000 ) + " val :"+ message.p )
-            let newValue = { x: (new Date().getTime() / 1000 ) , y: parseInt(message.p) };
+          let date = (new Date().getTime() / 1000).toString().substr(-4);
+          if (parseFloat(date) > 0.1) {
+            let newValue = {
+              x: new Date().getTime() / 1000,
+              y: parseFloat(message.p),
+            };
             setDatas((prevArray) => [...prevArray, newValue]);
+            setReal(message.p);
           }
         }
       }
-
       if (item.toString().toLowerCase().length != 0) {
         old = item.toString().toLowerCase() + "usdt";
       }
+      setCount(count + 1);
     };
-  }, [item]);
+  }, [item, quote]);
 
   return (
     <View style={styles.graph}>
-      {/* <Text>{JSON.stringify(datas)}</Text> */}
-      <Text>{stream}</Text>
-      <VictoryChart
-        width={350}
-        theme={VictoryTheme.material}
-      >
-        <VictoryAxis dependentAxis />
-        <VictoryLine
-          animate
-          style={{
-            data: { stroke: "#c43a31" },
-            parent: { border: "1px solid #ccc" },
-          }}
-          data={datas}
-        />
-        {/* <VictoryAxis tickFormat={(t) => `${t.getDate()}/${t.getMonth()}`} />
+      {datas.length > 1 ? (
+        <VictoryChart
+          width={350}
+          theme={VictoryTheme.material}
+          containerComponent={<VictoryZoomContainer />}
+        >
           <VictoryAxis dependentAxis />
-          {/* <VictoryCandlestick
+          <VictoryLine
             animate
-            candleColors={{ positive: "#5f5c5b", negative: "#c43a31" }}
+            style={{
+              data: { stroke: "#c43a31" },
+              parent: { border: "1px solid #ccc" },
+            }}
             data={datas}
-          /> */}
-      </VictoryChart>
+          />
+        </VictoryChart>
+      ) : (
+        <Text>Loading from binance websocket</Text>
+      )}
+      {item.toString().length != 0 ? (
+        <Text>
+          Cours Actuel du {item} : {real} ${" "}
+        </Text>
+      ) : (
+        <Text></Text>
+      )}
     </View>
   );
 }
